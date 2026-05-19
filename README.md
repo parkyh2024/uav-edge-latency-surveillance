@@ -29,7 +29,7 @@ uav-edge-latency-surveillance/
 | `detect_custom_radar_Jetson.py` | Runtime script used for the Jetson AGX Orin local edge-execution condition. |
 | `requirements.txt` | Minimal Python package requirements. |
 | `example_config.md` | Example runtime configuration and environment-variable usage. |
-| `sample_data/sample_input_video.mp4` | Short representative sample input video clip for demonstrating the runtime input format. |
+| `Sample_Video.mp4` | Short representative sample input video clip for demonstrating the runtime input format. |
 | `sample_data/README.md` | Description of the sample input video and its intended use. |
 
 ## Important Notes
