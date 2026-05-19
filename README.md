@@ -1,141 +1,190 @@
-# Edge-Based UAV Surveillance Runtime Scripts
+# UAV Edge Latency Surveillance
 
-This repository provides the public implementation scripts used for the runtime-feasibility experiments in the manuscript:
+This repository provides the public implementation scripts used for the runtime-feasibility experiments reported in the manuscript:
 
 **Stochastic Latency Decomposition and Constrained Runtime Feasibility Analysis for Edge-Based UAV Surveillance under Network-Denied Environments**
 
-The scripts implement the integrated UAV surveillance pipeline used in the paper:
+The repository is provided to improve implementation transparency and reproducibility for the video-based UAV surveillance pipeline. The implementation includes object detection, object tracking, threat assessment, visualization, and per-frame latency logging.
 
-1. YOLO-based UAV detection
-2. Kalman-filter-based object state smoothing
-3. Track persistence under temporary missed detections
-4. Anchor-distance-based threat assessment
-5. Hysteresis-based danger-state transition
-6. PIP magnified view, radar overlay, and flashing alert visualization
-7. Per-frame latency logging for inference, processing, display/I/O, total latency, and FPS
-
-## Repository contents
+## Repository Structure
 
 ```text
-.
-├── detect_custom_radar.py          # Host PC / SSH X11-oriented runtime script
-├── detect_custom_radar_Jetson.py   # Jetson AGX Orin-oriented runtime script
-├── requirements.txt                # Minimal Python package requirements
-├── example_config.md               # Example runtime settings and path placeholders
-└── .gitignore                      # Excludes datasets, weights, videos, logs, and local environments
+uav-edge-latency-surveillance/
+├── detect_custom_radar.py
+├── detect_custom_radar_Jetson.py
+├── requirements.txt
+├── example_config.md
+├── README.md
+├── .gitignore
+└── sample_data/
+    ├── README.md
+    └── sample_input_video.mp4
 ```
 
-## Data and model availability
+## Files
 
-This repository does **not** include the author-constructed UAV image dataset, trained model weights, TensorRT engine files, or input videos.
+| File | Description |
+|---|---|
+| `detect_custom_radar.py` | Runtime script used for the Host PC / SSH X11 display-path proxy condition. |
+| `detect_custom_radar_Jetson.py` | Runtime script used for the Jetson AGX Orin local edge-execution condition. |
+| `requirements.txt` | Minimal Python package requirements. |
+| `example_config.md` | Example runtime configuration and environment-variable usage. |
+| `sample_data/sample_input_video.mp4` | Short representative sample input video clip for demonstrating the runtime input format. |
+| `sample_data/README.md` | Description of the sample input video and its intended use. |
 
-These files are excluded because of data-use, storage, and institutional restrictions. They are available from the corresponding authors upon reasonable request, subject to applicable restrictions.
+## Important Notes
 
-Expected local file examples:
+This repository does **not** include the full author-constructed UAV image dataset, trained model weights, TensorRT engine files, or full evaluation videos used for the quantitative results in the manuscript.
 
-```text
-models/best.pt
-models/best.engine
-data/input_video.mp4
-```
+The following materials are not publicly distributed due to institutional and data-use restrictions:
+
+- full UAV image dataset;
+- trained PyTorch model weights, such as `best.pt`;
+- TensorRT engine files, such as `best.engine`;
+- full evaluation videos used for the quantitative experiments.
+
+These materials are available from the corresponding authors upon reasonable request, subject to institutional and data-use restrictions.
+
+The sample video included in `sample_data/` is a short representative clip provided only to illustrate the video input format of the runtime pipeline. It does **not** replace the full evaluation videos used for the quantitative results reported in the manuscript.
+
+## Runtime Pipeline Overview
+
+The scripts implement the following video-based UAV surveillance pipeline:
+
+1. video frame acquisition;
+2. YOLO-based UAV detection;
+3. object tracking using tracking IDs and bounding-box smoothing;
+4. anchor-point-based distance calculation;
+5. approach-history-based threat assessment;
+6. PIP magnified view and radar overlay visualization;
+7. flashing alert display;
+8. per-frame latency and FPS logging.
+
+The logged latency components include:
+
+- inference latency;
+- processing latency;
+- display/I/O latency;
+- total latency;
+- instantaneous FPS.
 
 ## Installation
 
 Create a Python environment and install the required packages:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-For Jetson AGX Orin, PyTorch, CUDA, TensorRT, and OpenCV should be installed according to the JetPack/L4T environment. The `requirements.txt` file is provided as a minimal reference and may need to be adapted for Jetson-specific installations.
+The scripts require a working installation of the Ultralytics YOLO package, OpenCV, NumPy, and a CUDA-capable environment when GPU inference is used.
 
-## Runtime configuration
+## Expected Model and Video Inputs
 
-The public scripts use environment variables to avoid exposing private local paths.
+The public scripts are configured to use environment variables so that private file paths do not need to be hard-coded.
+
+### PyTorch model
 
 ```bash
-export UAV_MODEL_PATH=models/best.pt
-export UAV_ENGINE_PATH=models/best.engine
-export UAV_VIDEO_PATH=data/input_video.mp4
-export UAV_TRACKER_CFG=bytetrack.yaml
-export UAV_OUTPUT_DIR=logs
+export UAV_MODEL_PATH="models/best.pt"
 ```
 
-Optional device variable:
+### TensorRT engine
 
 ```bash
-# Host PC
-export UAV_DEVICE=0
-
-# Jetson AGX Orin
-export UAV_DEVICE=cuda:0
+export UAV_ENGINE_PATH="models/best.engine"
 ```
 
-## Usage
-
-### Host PC / SSH X11-oriented runtime
+### Input video
 
 ```bash
-export UAV_MODEL_PATH=models/best.pt
-export UAV_VIDEO_PATH=data/input_video.mp4
-export UAV_DEVICE=0
+export UAV_VIDEO_PATH="sample_data/sample_input_video.mp4"
+```
+
+### Output log directory
+
+```bash
+export UAV_OUTPUT_DIR="logs"
+```
+
+If these variables are not set, the scripts use placeholder default paths. Users should replace them with their own model and video paths.
+
+## Running the Host PC / SSH X11 Proxy Script
+
+```bash
 python detect_custom_radar.py
 ```
 
-### TensorRT engine on Host PC
+This script corresponds to the Host PC-based runtime condition used to analyze a network-coupled display/output path through an SSH X11 display-path proxy.
+
+During execution, the user can select:
+
+- display resolution: SD, HD, or FHD;
+- model format: PyTorch `.pt` or TensorRT `.engine`;
+- target anchor point using the GUI.
+
+## Running the Jetson AGX Orin Script
 
 ```bash
-export UAV_ENGINE_PATH=models/best.engine
-export UAV_VIDEO_PATH=data/input_video.mp4
-export UAV_DEVICE=0
-python detect_custom_radar.py
-```
-
-Then select `2. TensorRT (.engine)` when prompted.
-
-### Jetson AGX Orin-oriented runtime
-
-```bash
-export UAV_ENGINE_PATH=models/best.engine
-export UAV_VIDEO_PATH=data/input_video.mp4
-export UAV_DEVICE=cuda:0
 python detect_custom_radar_Jetson.py
 ```
 
-Then select `2. TensorRT (.engine)` when prompted.
+This script corresponds to the Jetson AGX Orin local edge-execution condition. It is intended for the local execution path where detection, tracking, threat assessment, visualization, and output are performed on the edge device.
 
-## Anchor selection
+## Sample Input Video
 
-By default, the first frame is displayed and the user selects the target anchor by clicking on the image and pressing the space bar.
-
-## Runtime logs
-
-Each run saves a CSV file in the `logs/` directory:
+A short representative sample input video is provided at:
 
 ```text
-logs/latency_log_YYYYMMDD_HHMMSS.csv
+sample_data/sample_input_video.mp4
 ```
 
-The CSV columns are:
+This clip is included only for demonstrating the runtime input format of the video-based surveillance pipeline.
+
+It is not the full evaluation video used for the quantitative runtime results reported in the manuscript. Therefore, the sample clip should be used only for code-execution demonstration and pipeline-format verification.
+
+## Latency Log Output
+
+Each script generates a CSV latency log with columns similar to:
 
 ```text
 Frame, Inference(ms), Process(ms), Display(ms), Total(ms), FPS
 ```
 
-These logs can be used to calculate mean latency, standard deviation, P95, P99, and other runtime stability metrics.
-
-## Key parameters preserved from the manuscript implementation
+The log file is saved under the configured output directory, for example:
 
 ```text
-Inference input size: 1280
-Tracking missing-frame tolerance: 15 frames
-Approach threshold: 3 consecutive approach frames
-Danger range: 0.8 normalized anchor distance
-EMA smoothing coefficient for displayed latency values: 0.1
+logs/latency_log_YYYYMMDD_HHMMSS.csv
 ```
 
-## Notes
+These logs can be used to calculate mean latency, latency standard deviation, P95/P99 tail latency, and FPS statistics.
 
-This repository is intended to support reproducibility of the runtime pipeline structure and latency-logging procedure. It is not intended to redistribute the UAV dataset, trained weights, TensorRT engines, or experimental videos.
+## Reproducibility Scope
+
+This repository is intended to support reproducibility of the implementation structure and runtime measurement procedure. Exact reproduction of the quantitative results reported in the manuscript requires the original trained weights, TensorRT engine, evaluation videos, hardware configuration, and display environment.
+
+The public repository supports:
+
+- inspection of the runtime implementation logic;
+- reproduction of the video-processing pipeline structure;
+- verification of the latency-logging mechanism;
+- demonstration using a short representative sample input video.
+
+The public repository does not provide:
+
+- the full training dataset;
+- the full validation dataset;
+- the trained detector weights;
+- TensorRT engine binaries;
+- full evaluation videos used for quantitative measurements.
+
+## Citation
+
+If this repository is used or referenced, please cite the associated manuscript:
+
+```text
+Park, Y.H.; Kang, J.; Lee, K.-B. Stochastic Latency Decomposition and Constrained Runtime Feasibility Analysis for Edge-Based UAV Surveillance under Network-Denied Environments. Mathematics, 2026.
+```
+
+## License and Use
+
+This repository is provided for academic review and research transparency. Please contact the corresponding authors for questions regarding reuse, redistribution, or access to non-public experimental materials.
