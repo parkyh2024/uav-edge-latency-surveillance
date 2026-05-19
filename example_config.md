@@ -9,7 +9,7 @@ Replace these paths with your local files.
 ```text
 Model path, PyTorch: models/best.pt
 Model path, TensorRT: models/best.engine
-Input video: data/input_video.mp4
+Input video: Sample_Video.mp4
 Tracker configuration: bytetrack.yaml
 Output log directory: logs/
 ```
@@ -21,7 +21,7 @@ The model weights, TensorRT engine files, dataset, and input videos are not incl
 ```bash
 export UAV_MODEL_PATH=models/best.pt
 export UAV_ENGINE_PATH=models/best.engine
-export UAV_VIDEO_PATH=data/input_video.mp4
+export UAV_VIDEO_PATH=Sample_Video.mp4
 export UAV_TRACKER_CFG=bytetrack.yaml
 export UAV_OUTPUT_DIR=logs
 ```
@@ -32,7 +32,7 @@ export UAV_OUTPUT_DIR=logs
 
 ```bash
 export UAV_MODEL_PATH=models/best.pt
-export UAV_VIDEO_PATH=data/input_video.mp4
+export UAV_VIDEO_PATH=Sample_Video.mp4
 export UAV_DEVICE=0
 python detect_custom_radar.py
 ```
@@ -41,7 +41,7 @@ python detect_custom_radar.py
 
 ```bash
 export UAV_ENGINE_PATH=models/best.engine
-export UAV_VIDEO_PATH=data/input_video.mp4
+export UAV_VIDEO_PATH=Sample_Video.mp4
 export UAV_DEVICE=0
 python detect_custom_radar.py
 ```
@@ -52,7 +52,7 @@ Select `2. TensorRT (.engine)` when prompted.
 
 ```bash
 export UAV_ENGINE_PATH=models/best.engine
-export UAV_VIDEO_PATH=data/input_video.mp4
+export UAV_VIDEO_PATH=Sample_Video.mp4
 export UAV_DEVICE=cuda:0
 python detect_custom_radar_Jetson.py
 ```
