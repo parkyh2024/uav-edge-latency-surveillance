@@ -1,0 +1,6 @@
+# Minimal runtime dependencies for the public reproduction scripts.
+# Jetson users may need to install PyTorch, CUDA, TensorRT, and OpenCV via JetPack/L4T-specific instructions.
+
+numpy>=1.23.0
+opencv-python>=4.8.0
+ultralytics>=8.0.0
