@@ -30,7 +30,7 @@ uav-edge-latency-surveillance/
 | `requirements.txt` | Minimal Python package requirements. |
 | `example_config.md` | Example runtime configuration and environment-variable usage. |
 | `Sample_Video.mp4` | Short representative sample input video clip for demonstrating the runtime input format. |
-| `sample_data/README.md` | Description of the sample input video and its intended use. |
+| `README.md` | Description of the sample input video and its intended use. |
 
 ## Important Notes
 
