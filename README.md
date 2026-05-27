@@ -1,10 +1,12 @@
 # UAV Edge Latency Surveillance
 
-This repository provides the public implementation scripts used for the runtime-feasibility experiments reported in the manuscript:
+This repository provides the public implementation scripts and reproducibility materials used for the runtime-feasibility experiments reported in the manuscript:
 
 **Stochastic Latency Decomposition and Constrained Runtime Feasibility Analysis for Edge-Based UAV Surveillance under Network-Denied Environments**
 
 The repository is provided to improve implementation transparency and reproducibility for the video-based UAV surveillance pipeline. The implementation includes object detection, object tracking, threat assessment, visualization, and per-frame latency logging.
+
+In addition to the runtime scripts and a representative sample input video, this repository provides anonymized per-frame latency logs and a reproduction script for verifying the latency statistics reported in Tables 9–11 and Figures 4–5 of the manuscript.
 
 ## Repository Structure
 
@@ -16,9 +18,38 @@ uav-edge-latency-surveillance/
 ├── example_config.md
 ├── README.md
 ├── .gitignore
-└── sample_data/
-    ├── README.md
-    └── sample_input_video.mp4
+├── sample_data/
+│   ├── README.md
+│   └── sample_input_video.mp4
+└── defense_round2/
+    ├── README_latency_logs.txt
+    ├── reproduce_latency_statistics.py
+    ├── table9_10_component_latency_logs/
+    │   ├── best_pt_ssh_x11_sd.csv
+    │   ├── best_pt_ssh_x11_hd.csv
+    │   ├── best_pt_ssh_x11_fhd.csv
+    │   ├── best_pt_jetson_sd.csv
+    │   ├── best_pt_jetson_hd.csv
+    │   ├── best_pt_jetson_fhd.csv
+    │   ├── best_engine_ssh_x11_sd.csv
+    │   ├── best_engine_ssh_x11_hd.csv
+    │   ├── best_engine_ssh_x11_fhd.csv
+    │   ├── best_engine_jetson_sd.csv
+    │   ├── best_engine_jetson_hd.csv
+    │   └── best_engine_jetson_fhd.csv
+    └── table11_tail_latency_logs/
+        ├── best_pt_ssh_x11_sd.csv
+        ├── best_pt_ssh_x11_hd.csv
+        ├── best_pt_ssh_x11_fhd.csv
+        ├── best_pt_jetson_sd.csv
+        ├── best_pt_jetson_hd.csv
+        ├── best_pt_jetson_fhd.csv
+        ├── best_engine_ssh_x11_sd.csv
+        ├── best_engine_ssh_x11_hd.csv
+        ├── best_engine_ssh_x11_fhd.csv
+        ├── best_engine_jetson_sd.csv
+        ├── best_engine_jetson_hd.csv
+        └── best_engine_jetson_fhd.csv
 ```
 
 ## Files
@@ -31,10 +62,14 @@ uav-edge-latency-surveillance/
 | `example_config.md` | Example runtime configuration and environment-variable usage. |
 | `sample_data/sample_input_video.mp4` | Short representative sample input video clip for demonstrating the runtime input format. |
 | `sample_data/README.md` | Description of the sample input video and its intended use. |
+| `defense_round2/README_latency_logs.txt` | Description of the anonymized per-frame latency logs released for reproducibility. |
+| `defense_round2/reproduce_latency_statistics.py` | Reproduction script for computing the mean, standard deviation, and P95/P99 latency statistics reported in Tables 9–11. |
+| `defense_round2/table9_10_component_latency_logs/` | Anonymized per-frame latency logs used to compute the component-wise mean and standard deviation values reported in Tables 9 and 10 and visualized in Figures 4 and 5. |
+| `defense_round2/table11_tail_latency_logs/` | Retained anonymized per-frame latency logs used to compute the P95/P99 tail-latency statistics reported in Table 11. |
 
 ## Important Notes
 
-This repository does **not** include the full author-constructed UAV image dataset, trained model weights, TensorRT engine files, or full evaluation videos used for the quantitative results in the manuscript.
+This repository does **not** include the full author-constructed UAV image dataset, trained model weights, TensorRT engine files, or full evaluation videos used for the quantitative results in the manuscript. However, it does include anonymized per-frame latency logs used to verify the latency summary statistics reported in Tables 9–11 and Figures 4–5.
 
 The following materials are not publicly distributed due to institutional and data-use restrictions:
 
@@ -44,6 +79,8 @@ The following materials are not publicly distributed due to institutional and da
 - full evaluation videos used for the quantitative experiments.
 
 These materials are available from the corresponding authors upon reasonable request, subject to institutional and data-use restrictions.
+
+The anonymized per-frame latency logs in `defense_round2/` do **not** contain image data, model weights, TensorRT binaries, or full evaluation videos. They contain only frame-level latency measurements and FPS values required to verify the reported runtime statistics.
 
 The sample video included in `sample_data/` is a short representative clip provided only to illustrate the video input format of the runtime pipeline. It does **not** replace the full evaluation videos used for the quantitative results reported in the manuscript.
 
@@ -158,16 +195,56 @@ logs/latency_log_YYYYMMDD_HHMMSS.csv
 
 These logs can be used to calculate mean latency, latency standard deviation, P95/P99 tail latency, and FPS statistics.
 
+## Released Per-Frame Latency Logs
+
+Anonymized per-frame latency logs used for the manuscript's runtime analysis are provided in:
+
+```text
+defense_round2/
+```
+
+The folder `table9_10_component_latency_logs/` contains the per-frame logs used to compute the component-wise mean and standard deviation values reported in Tables 9 and 10 and visualized in Figures 4 and 5.
+
+The folder `table11_tail_latency_logs/` contains the retained per-frame logs used to compute the P95/P99 tail-latency statistics reported in Table 11.
+
+Each CSV file includes the following columns:
+
+```text
+Frame, Inference(ms), Process(ms), Display(ms), Total(ms), FPS
+```
+
+The initial 60 frames are excluded when computing the reported summary statistics and tail-latency statistics.
+
+To reproduce the reported latency statistics, run:
+
+```bash
+cd defense_round2
+python reproduce_latency_statistics.py
+```
+
+The script reads the released CSV files and reports:
+
+- mean and standard deviation of inference latency;
+- mean and standard deviation of processing latency;
+- mean and standard deviation of display/I/O latency;
+- mean and standard deviation of total latency;
+- mean and standard deviation of FPS;
+- P95 and P99 total-latency statistics;
+- P95 and P99 display-latency statistics.
+
 ## Reproducibility Scope
 
-This repository is intended to support reproducibility of the implementation structure and runtime measurement procedure. Exact reproduction of the quantitative results reported in the manuscript requires the original trained weights, TensorRT engine, evaluation videos, hardware configuration, and display environment.
+This repository is intended to support reproducibility of the implementation structure, runtime measurement procedure, and reported latency statistics.
 
 The public repository supports:
 
 - inspection of the runtime implementation logic;
 - reproduction of the video-processing pipeline structure;
 - verification of the latency-logging mechanism;
-- demonstration using a short representative sample input video.
+- demonstration using a short representative sample input video;
+- independent verification of the component-wise latency statistics reported in Tables 9 and 10 using anonymized per-frame logs;
+- independent verification of the P95/P99 tail-latency statistics reported in Table 11 using retained anonymized per-frame logs;
+- verification of the latency data underlying Figures 4 and 5.
 
 The public repository does not provide:
 
@@ -176,6 +253,14 @@ The public repository does not provide:
 - the trained detector weights;
 - TensorRT engine binaries;
 - full evaluation videos used for quantitative measurements.
+
+Because the full evaluation videos, trained weights, and TensorRT engine binaries are not publicly distributed, the released latency logs are intended to support independent verification of the reported latency statistics rather than full re-execution of the complete quantitative experiments.
+
+## Reproducibility Data
+
+The anonymized per-frame latency logs and reproduction script are provided for review and reproducibility of the manuscript's latency-decomposition results. These files correspond to the runtime conditions reported in Tables 9–11 and Figures 4–5.
+
+The logs were anonymized to remove private file paths and environment-specific identifiers. They retain the frame index and measured latency components required to reproduce the reported summary statistics.
 
 ## Citation
 
